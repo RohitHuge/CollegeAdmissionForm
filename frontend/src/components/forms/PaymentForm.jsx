@@ -56,7 +56,7 @@ const PaymentForm = () => {
       updateSection('payment', { file: null });
       return;
     }
-    if (!['application/pdf', 'image/png', 'image/jpeg'].includes(f.type)) {
+    if (!['application/pdf', 'image/png', 'image/jpeg', 'image/jpg'].includes(f.type)) {
       setFileError('Only PDF, PNG, or JPG allowed.');
       setFile(null);
       updateSection('payment', { file: null });
@@ -128,7 +128,7 @@ const PaymentForm = () => {
       <InputWrapper label="Upload Screenshot (PDF/Image, max 1MB)" error={errors.file || fileError} required>
         <input
           type="file"
-          accept="application/pdf,image/png,image/jpeg"
+          accept="application/pdf,image/png,image/jpeg,image/jpg"
           onChange={handleFile}
           className="w-full px-2 py-1 border rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
         />
