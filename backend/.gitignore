@@ -142,3 +142,9 @@ dist
 .svelte-kit
 
 # End of https://www.toptal.com/developers/gitignore/api/node
+
+# Ignore environment variable files
+.env
+
+# Ignore Google Cloud service account keys in config folder
+config/*.json
