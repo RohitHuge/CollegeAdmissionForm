@@ -197,3 +197,27 @@ export const educationForm = async (req, res) => {
         return res.status(500).json({ message: error.message });
     }
 }
+
+export const branchAndDocsForm = async (req, res) => {
+    const {prefs,  enNo} = req.body;
+    const ackFile = req.file;
+    // const optionalDocs = req.files;
+    try {
+        const user = await User.findOne({ en_no: enNo });
+        if (!user) {
+            return res.status(404).json({ message: 'Form Submission failed' });
+        }
+        if (!user.branch_details) user.branch_details = {};
+        user.branch_details.prefs = prefs;
+        user.document_ack_url = await uploadOnCloudinary(ackFile.buffer);
+        if(!user.document_ack_url) {
+            return res.status(400).json({ message: 'Error in uploading acknowledgement file. Please try again.' });
+        }
+        // user.additional_docs_urls = optionalDocs.map(doc => uploadOnCloudinary(doc.buffer));
+        await user.save();
+        res.status(201).json({ message: 'Branch and docs details saved!', status: 'success' });
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({ message: error.message });
+    }
+}

@@ -3,6 +3,7 @@ import { useFormContext } from '../../context/FormContext.jsx';
 import InputWrapper from '../common/InputWrapper.jsx';
 import FormButton from '../common/FormButton.jsx';
 import Loader from '../common/Loader.jsx';
+import { BACKEND_URL } from '../../../config.js';
 
 const branches = [
   'Mechanical',
@@ -86,15 +87,30 @@ const BranchAndDocsForm = () => {
   };
 
   // On Next
-  const handleNext = e => {
+  const handleNext = async e => {
     e.preventDefault();
     if (!validate()) return;
     setChecking(true);
-    setTimeout(() => {
-      setChecking(false);
-      setCurrentTab(currentTab + 1);
-      showToast('Application complete! You may now submit.', 'success');
-    }, 1000);
+    const formDataToSend = new FormData();
+    formDataToSend.append('prefs', prefs);
+    formDataToSend.append('ackFile', ackFile);
+    formDataToSend.append('optionalDocs', optionalDocs);
+    formDataToSend.append('enNo', formData.identity.enNo);
+
+    const response = await fetch(`${BACKEND_URL}/api/forms/branchanddocsform`, {
+      method: 'POST',
+      body: formDataToSend,
+    });
+    const data = await response.json();
+    if(response.ok) {
+      setTimeout(() => {
+        setChecking(false);
+        setCurrentTab(currentTab + 1);
+        showToast('Application complete! You may now submit.', 'success');
+      }, 1000);
+    } else {
+      showToast(data.message, 'error');
+    }
   };
 
   React.useEffect(() => {
