@@ -221,3 +221,7 @@ export const branchAndDocsForm = async (req, res) => {
         return res.status(500).json({ message: error.message });
     }
 }
+
+export const healthCheck = async (req, res) => {
+    res.status(200).json({ status: 'ok' });
+}
