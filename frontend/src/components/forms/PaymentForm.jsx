@@ -22,6 +22,9 @@ const PaymentForm = () => {
   const [checking, setChecking] = useState(false);
   const [ocrError, setOcrError] = useState(false);
   const [errors, setErrors] = useState({});
+  const [extractedText, setExtractedText] = useState('');
+  const [rawText, setRawText] = useState('');
+  const [showTextModal, setShowTextModal] = useState(false);
 
   // Validate fields
   const validate = () => {
@@ -73,21 +76,30 @@ const PaymentForm = () => {
   const handleNext = async (e) => {
     e.preventDefault();
     if (!validate()) return;
-    setChecking(true);
-    setTimeout(async () => {
-      response = await fetch(`${BACKEND_URL}/api/forms/paymentform`, {
+    try {
+      setChecking(true);
+      const formDataToSend = new FormData();
+      formDataToSend.append('enNo', formData.identity.enNo);
+      formDataToSend.append('transactionId', txnId);
+      formDataToSend.append('paymentScreenshot', file);
+
+      const response = await fetch(`${BACKEND_URL}/api/forms/paymentform`, {
         method: 'POST',
-        body: JSON.stringify({ enNo, dob, transactionId, paymentScreenshotUrl: file }),
+        body: formDataToSend,
       });
       const data = await response.json();
-      console.log(data);
+      setExtractedText(data.text || '');
+      setRawText(data.raw || '');
       if (response.ok) {
-        setCurrentTab(currentTab + 1);
         showToast('Payment details verified!', 'success');
       } else {
         showToast(data.message, 'error');
       }
-    }, 1500);
+    } catch (error) {
+      console.log(error);
+      showToast('Something went wrong', 'error');
+      setChecking(false);
+    }
   };
 
   // Validate on mount and on change
@@ -139,11 +151,40 @@ const PaymentForm = () => {
         />
         {file && <div className="text-xs text-blue-600 mt-1">{file.name}</div>}
       </InputWrapper>
-      <div className="mb-4 flex justify-end">
+      <div className="mb-4 flex justify-end gap-2">
+        <button
+          type="button"
+          className="px-4 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300 transition"
+          onClick={() => setShowTextModal((prev) => !prev)}
+        >
+          {showTextModal ? 'Hide Extracted Text' : 'Show Extracted Text'}
+        </button>
         <FormButton type="submit" disabled={checking}>
           {checking ? <Loader size={5} /> : 'Next'}
         </FormButton>
       </div>
+      {/* Modal for extracted and raw text */}
+      {showTextModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
+          <div className="bg-white rounded-lg shadow-xl p-8 max-w-md w-full text-center border-t-4 border-blue-500">
+            <h2 className="text-xl font-bold text-blue-700 mb-4">Extracted Text Preview</h2>
+            <div className="mb-4 text-left">
+              <strong>Extracted Text:</strong>
+              <pre className="bg-gray-100 p-2 rounded mt-1 text-sm max-h-40 overflow-auto">{extractedText || 'No extracted text.'}</pre>
+            </div>
+            <div className="mb-4 text-left">
+              <strong>Raw Text:</strong>
+              <pre className="bg-gray-100 p-2 rounded mt-1 text-sm max-h-40 overflow-auto">{rawText ? (typeof rawText === 'object' ? JSON.stringify(rawText, null, 2) : rawText) : 'No raw text.'}</pre>
+            </div>
+            <button
+              className="mt-2 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition"
+              onClick={() => setShowTextModal(false)}
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      )}
       <ErrorModal
         show={ocrError}
         message={"OCR validation failed. Please upload a clearer screenshot or try again."}
