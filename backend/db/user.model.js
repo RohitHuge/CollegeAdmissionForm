@@ -1,5 +1,5 @@
 import mongoose from 'mongoose';
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 
 const userSchema = new mongoose.Schema({
   form_id: {
@@ -9,11 +9,11 @@ const userSchema = new mongoose.Schema({
   },
 
   // Page 1: EN No. + DOB + Payment Details
-  en_no: { type: String, required: true },
+  en_no: { type: String, required: true , unique: true },
   dob: { type: String, required: true },
 
   account_holder: { type: String },
-  transaction_id: { type: String, required: true, unique: true },
+  transaction_id: { type: String, unique: true },
   payment_screenshot_url: { type: String },
 
   declarations: {
@@ -37,7 +37,7 @@ const userSchema = new mongoose.Schema({
 
 
   // Page 3: Qualification Type
-  qualification_type: { type: String, required: true , enum: ['HSC', 'Diploma']}, // "HSC" or "Diploma"
+  qualification_type: { type: String, enum: ['HSC', 'Diploma']}, // "HSC" or "Diploma"
 
   // Page 4: HSC Details
   hsc_details: {

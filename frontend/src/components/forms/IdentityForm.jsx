@@ -3,6 +3,7 @@ import { useFormContext } from '../../context/FormContext.jsx';
 import InputWrapper from '../common/InputWrapper.jsx';
 import FormButton from '../common/FormButton.jsx';
 import Loader from '../common/Loader.jsx';
+import { BACKEND_URL } from '../../../config.js';
 
 const IdentityForm = () => {
   const { formData, updateSection, setSectionValid, showToast, currentTab, setCurrentTab } = useFormContext();
@@ -34,14 +35,23 @@ const IdentityForm = () => {
     e.preventDefault();
     if (!validate()) return;
     setChecking(true);
-    setTimeout(() => {
+    setTimeout(async () => {
       setChecking(false);
-      const lastDigit = enNo.trim().slice(-1);
-      if (!isNaN(lastDigit) && Number(lastDigit) % 2 === 0) {
-        setResumeModal(true);
-      } else {
+      const response = await fetch(`${BACKEND_URL}/api/forms/identityform`, {
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        method: 'POST',
+        body: JSON.stringify({ enNo, dob }),
+      });
+      const data = await response.json();
+      if (response.ok) {
         setCurrentTab(currentTab + 1);
         showToast('Identity details saved!', 'success');
+      } else if (response.status === 422) {
+        setResumeModal(true);
+      } else {
+        showToast(data.message, 'error');
       }
     }, 1200);
   };

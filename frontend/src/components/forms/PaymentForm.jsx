@@ -4,6 +4,7 @@ import InputWrapper from '../common/InputWrapper.jsx';
 import FormButton from '../common/FormButton.jsx';
 import Loader from '../common/Loader.jsx';
 import ErrorModal from '../common/ErrorModal.jsx';
+import { BACKEND_URL } from '../../../config.js';
 
 const declarations = [
   'I declare that the information provided is true to the best of my knowledge.',
@@ -73,14 +74,18 @@ const PaymentForm = () => {
     e.preventDefault();
     if (!validate()) return;
     setChecking(true);
-    setTimeout(() => {
-      setChecking(false);
-      // Simulate OCR fail 30% of the time
-      if (Math.random() < 0.3) {
-        setOcrError(true);
-      } else {
+    setTimeout(async () => {
+      response = await fetch(`${BACKEND_URL}/api/forms/paymentform`, {
+        method: 'POST',
+        body: JSON.stringify({ enNo, dob, transactionId, paymentScreenshotUrl: file }),
+      });
+      const data = await response.json();
+      console.log(data);
+      if (response.ok) {
         setCurrentTab(currentTab + 1);
         showToast('Payment details verified!', 'success');
+      } else {
+        showToast(data.message, 'error');
       }
     }, 1500);
   };
