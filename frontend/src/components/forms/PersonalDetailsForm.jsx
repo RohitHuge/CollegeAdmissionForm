@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useFormContext } from '../../context/FormContext.jsx';
 import InputWrapper from '../common/InputWrapper.jsx';
 import FormButton from '../common/FormButton.jsx';
+import { BACKEND_URL } from '../../../config.js';
 
 const religions = [
   'Hindu', 'Muslim', 'Sikh', 'Christian', 'Buddha', 'Jain', 'Parsi', 'Sindhi'
@@ -56,11 +57,24 @@ const PersonalDetailsForm = () => {
   };
 
   // On Next
-  const handleNext = e => {
+  const handleNext = async e => {
     e.preventDefault();
     if (!validate()) return;
-    setCurrentTab(currentTab + 1);
-    showToast('Personal details saved!', 'success');
+    console.log(fields);
+    const response = await fetch(`${BACKEND_URL}/api/forms/personalform`, {
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      method: 'POST',
+      body: JSON.stringify({fields, enNo: formData.identity.enNo}),
+    });
+    const data = await response.json();
+    if (response.ok) {
+      setCurrentTab(currentTab + 1);
+      showToast('Personal details saved!', 'success');
+    } else {
+      showToast(data.message, 'error');
+    }
   };
 
   React.useEffect(() => {

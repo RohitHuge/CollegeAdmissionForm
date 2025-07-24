@@ -136,3 +136,32 @@ export const paymentForm = async (req, res) => {
     }
 }
 
+export const personalForm = async (req, res) => {
+    const {fields, enNo} = req.body;
+    const {address , candidateType, category, firstName, gender, lastName, middleName, motherName, religion, studentMobile , parentMobile} = fields;
+    try {
+        const user = await User.findOne({ en_no: enNo });
+        if (!user) {
+            return res.status(404).json({ message: 'Form Submission failed' });
+        }
+        console.log(address, candidateType, category, firstName, gender, lastName, middleName, motherName, religion, studentMobile, parentMobile);
+        user.personal_details.address = address;
+        user.personal_details.candidate_type = candidateType;
+        user.personal_details.category = category;
+        user.personal_details.first_name = firstName;
+        user.personal_details.gender = gender;
+        user.personal_details.last_name = lastName;
+        user.personal_details.middle_name = middleName;
+        user.personal_details.mother_name = motherName;
+        user.personal_details.religion = religion;
+        user.personal_details.student_mobile = studentMobile;
+        user.personal_details.parent_mobile = parentMobile;
+        await user.save();
+        res.status(201).json({ message: 'Personal details saved!', status: 'success' });
+        
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({ message: error.message });
+}
+
+}
