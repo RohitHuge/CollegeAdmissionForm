@@ -77,7 +77,7 @@ const PaymentForm = () => {
     e.preventDefault();
     if (!validate()) return;
     try {
-      setChecking(true);
+      // setChecking(true);
       const formDataToSend = new FormData();
       formDataToSend.append('enNo', formData.identity.enNo);
       formDataToSend.append('transactionId', txnId);
@@ -92,6 +92,7 @@ const PaymentForm = () => {
       setRawText(data.raw || '');
       if (response.ok) {
         showToast('Payment details verified!', 'success');
+        setCurrentTab(currentTab + 1);
       } else {
         showToast(data.message, 'error');
       }

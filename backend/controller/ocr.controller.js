@@ -36,7 +36,7 @@ export const ocrController = async (file) => {
     // Return both the raw result and the extracted text for testing
     return {
       text: extractedText,
-      raw: result
+      // raw: result
     };
   } catch (error) {
     console.error('Error processing image:', error);

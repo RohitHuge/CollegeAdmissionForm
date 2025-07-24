@@ -1,6 +1,7 @@
 import User from '../db/user.model.js';
 import { ocrController } from './ocr.controller.js';
-
+import { extractPaymentInfo } from './geminiApi.js';
+import { uploadOnCloudinary } from '../cloudinary.js';
 
 export const identityForm = async (req, res) => {
     const { enNo, dob } = req.body;
@@ -45,17 +46,83 @@ export const paymentForm = async (req, res) => {
         }
 
         //send the image for ocr
-        const { text, raw } = await ocrController(paymentScreenshot);
+        const { text } = await ocrController(paymentScreenshot);
+        
+        // const text = `11:54 AM | 10.0KB/s
+        //     Transaction Successful
+        //     12:26 pm on 07 Oct 2020
+        //     Transaction ID
+        //     P2010071226434492347527
+        //     Paid to
+        //     4G
+        //     55
+        //     COPY
+        //     SC
+        //     State Bank Collect
+        //     1,050
+        //     Debited from
+        //     ******6976
+        //     UTR:028155489086
+        //     Money sitting idle in your bank account?       
+        //     SHARE
+        //     ₹1,050
+        //     Move it to Liquid Funds and give it a chance to
+        //     grow
+        //     >
+        //     (?)
+        //     Contact PhonePe Support
+        //     Powered by
+        //     BHIM UPI YES BANK ICICI Bank `;
 
         if (!text) {
-            return res.status(400).json({ message: 'Invalid payment screenshot' });
+            return res.status(400).json({ message: 'Error in Verifying Payment. Please try again.' });
         }
-        return res.status(200).json({ text, raw });
-
         //send ocr result to ingest
+        const paymentInfo = await extractPaymentInfo(text, 'State Bank Collect');
+        if (!paymentInfo) {
+            return res.status(400).json({ message: 'Error in Verifying Payment. Please try again.' });
+        }
+        const paymentInfoJson = JSON.parse(paymentInfo.candidates[0].content.parts[0].text);
+        console.log(paymentInfoJson);
+        //if ocr result is not valid, return error
+        if (!paymentInfoJson) {
+            return res.status(400).json({ message: 'Error in Verifying Payment. Please try again.' });
+        }
+       
+        if(!paymentInfoJson.received_by_verified) {
+            return res.status(400).json({ message: 'Payment not verified. Please try again.Please double check the payment screenshot.' });
+            console.log("Error :: received_by_verified");
+        }
+
+        if(paymentInfoJson.payment_status !== 'Successful') {
+            console.log("Error :: payment_status");
+            return res.status(400).json({ message: 'Payment not verified. Please try again.Please double check the payment screenshot.' });
+        }
+
+        if(paymentInfoJson.amount < 1000) {
+            console.log("Error :: amount");
+            return res.status(400).json({ message: 'Payment amount is not correct. Please try again.Please double check the payment screenshot.' });
+        }
+
+        if(paymentInfoJson.transaction_id !== transactionId) {
+            console.log("Error :: transaction_id");
+            return res.status(400).json({ message: 'Transaction ID is not correct. Please try again.Please double check the payment screenshot.' });
+        }
+        const paymentScreenshotUrl = await uploadOnCloudinary(paymentScreenshot.buffer);
+        if(!paymentScreenshotUrl) {
+            console.log("Error :: uploadOnCloudinary");
+            return res.status(400).json({ message: 'Error in uploading payment screenshot. Please try again.' });
+        }
+        user.payment_screenshot_url = paymentScreenshotUrl.url;
+        user.transaction_id = transactionId;
+        await user.save();
+
+        res.status(200).json({ message: 'Payment details saved!', status: 'success' });
+        
+
+
 
         
-        //if ocr result is not valid, return error
         //if ocr result is valid,
         //send the screenshot to cloudinary
         //get the url from cloudinary
