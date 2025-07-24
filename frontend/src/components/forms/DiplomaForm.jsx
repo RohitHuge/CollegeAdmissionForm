@@ -34,6 +34,10 @@ const DiplomaForm = ({ setParentValid }) => {
 
   useEffect(() => {
     validate();
+    formData.diploma.aggregate = fields.aggregate;
+    formData.diploma.percent = fields.percent;
+    formData.diploma.cetPercentile = fields.cetPercentile;
+    formData.diploma.jeePercentile = fields.jeePercentile;
     // eslint-disable-next-line
   }, [fields]);
 

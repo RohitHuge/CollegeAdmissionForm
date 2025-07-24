@@ -45,6 +45,16 @@ const HSCForm = ({ setParentValid }) => {
 
   useEffect(() => {
     validate();
+    formData.hsc.physics = fields.physics;
+    formData.hsc.chemistry = fields.chemistry;
+    formData.hsc.maths = fields.maths;
+    formData.hsc.biology = fields.biology;
+    formData.hsc.total = fields.total;
+    formData.hsc.percent = fields.percent;
+    formData.hsc.cetPercentile = fields.cetPercentile;
+    formData.hsc.stateMerit = fields.stateMerit;
+    formData.hsc.jeePercentile = fields.jeePercentile;
+    formData.hsc.allIndiaMerit = fields.allIndiaMerit;
     // eslint-disable-next-line
   }, [fields]);
 

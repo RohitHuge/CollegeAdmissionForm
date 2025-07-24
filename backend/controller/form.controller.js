@@ -144,7 +144,6 @@ export const personalForm = async (req, res) => {
         if (!user) {
             return res.status(404).json({ message: 'Form Submission failed' });
         }
-        console.log(address, candidateType, category, firstName, gender, lastName, middleName, motherName, religion, studentMobile, parentMobile);
         user.personal_details.address = address;
         user.personal_details.candidate_type = candidateType;
         user.personal_details.category = category;
@@ -164,4 +163,37 @@ export const personalForm = async (req, res) => {
         return res.status(500).json({ message: error.message });
 }
 
+}
+
+export const educationForm = async (req, res) => {
+    const {exam, enNo, diploma, hsc} = req.body;
+    try {
+        const user = await User.findOne({ en_no: enNo });
+        if (!user) {
+            return res.status(404).json({ message: 'Form Submission failed' });
+        }
+        user.qualification_type = exam;
+        if (exam === 'HSC') {
+            user.hsc_details.physics = hsc.physics;
+            user.hsc_details.chemistry = hsc.chemistry;
+            user.hsc_details.maths = hsc.maths;
+            user.hsc_details.biology = hsc.biology;
+            user.hsc_details.total_marks = hsc.total;
+            user.hsc_details.percentage = hsc.percent;
+            user.hsc_details.mh_cet_score = hsc.cetPercentile;
+            user.hsc_details.jee_score = hsc.jeePercentile;
+            user.hsc_details.state_merit = hsc.stateMerit;
+            user.hsc_details.all_india_merit = hsc.allIndiaMerit;
+        } else {
+            user.diploma_details.total_marks = diploma.aggregate;
+            user.diploma_details.percentage = diploma.percent;
+            user.diploma_details.mh_cet_score = diploma.cetPercentile;
+            user.diploma_details.jee_score = diploma.jeePercentile;
+        }
+        await user.save();
+        res.status(201).json({ message: 'Education details saved!', status: 'success' });
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({ message: error.message });
+    }
 }

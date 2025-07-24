@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useFormContext } from '../../context/FormContext.jsx';
 import InputWrapper from '../common/InputWrapper.jsx';
 import FormButton from '../common/FormButton.jsx';
+import { BACKEND_URL } from '../../../config.js';
 
 const HSCForm = React.lazy(() => import('./HSCForm.jsx'));
 const DiplomaForm = React.lazy(() => import('./DiplomaForm.jsx'));
@@ -30,11 +31,24 @@ const EducationForm = () => {
   };
 
   // On Next
-  const handleNext = e => {
+  const handleNext = async e => {
     e.preventDefault();
     if (!validate()) return;
-    setCurrentTab(currentTab + 1);
-    showToast('Education details saved!', 'success');
+    console.log(exam, formData.diploma , formData.hsc);
+    const response = await fetch(`${BACKEND_URL}/api/forms/educationform`, {
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      method: 'POST',
+      body: JSON.stringify({exam, enNo: formData.identity.enNo, diploma: formData.diploma, hsc: formData.hsc}),
+    });
+    const data = await response.json();
+    if (response.ok) {
+      setCurrentTab(currentTab + 1);
+      showToast('Education details saved!', 'success');
+    } else {
+      showToast(data.message, 'error');
+    }
   };
 
   React.useEffect(() => {

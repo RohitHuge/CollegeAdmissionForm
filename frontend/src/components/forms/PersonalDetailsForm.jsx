@@ -60,7 +60,6 @@ const PersonalDetailsForm = () => {
   const handleNext = async e => {
     e.preventDefault();
     if (!validate()) return;
-    console.log(fields);
     const response = await fetch(`${BACKEND_URL}/api/forms/personalform`, {
       headers: {
         'Content-Type': 'application/json',
