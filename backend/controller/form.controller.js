@@ -40,10 +40,10 @@ export const paymentForm = async (req, res) => {
             return res.status(404).json({ message: 'Form Submission failed' });
         }
 
-        const checkAlreadyPaid = await User.findOne({ transaction_id: transactionId });
-        if (checkAlreadyPaid) {
-            return res.status(422).json({ message: 'Transaction ID already exists' });
-        }
+        // const checkAlreadyPaid = await User.findOne({ transaction_id: transactionId });
+        // if (checkAlreadyPaid) {
+        //     return res.status(422).json({ message: 'Transaction ID already exists' });
+        // }
 
         //send the image for ocr
         const { text } = await ocrController(paymentScreenshot);
