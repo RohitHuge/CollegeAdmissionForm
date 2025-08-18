@@ -93,8 +93,10 @@ const PaymentForm = () => {
       if (response.ok) {
         showToast('Payment details verified!', 'success');
         setCurrentTab(currentTab + 1);
+        setChecking(false);
       } else {
         showToast(data.message, 'error');
+        setChecking(false);
       }
     } catch (error) {
       console.log(error);
