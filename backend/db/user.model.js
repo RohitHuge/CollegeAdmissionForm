@@ -13,7 +13,7 @@ const userSchema = new mongoose.Schema({
   dob: { type: String, required: true },
 
   account_holder: { type: String },
-  transaction_id: { type: String, unique: true },
+  transaction_id: { type: String},
   payment_screenshot_url: { type: String },
 
   declarations: {
